@@ -5,6 +5,7 @@ import java.util.Currency;
 import java.util.List;
 
 import com.ezra.lending_app.domain.enums.LoanTerm;
+import com.ezra.lending_app.domain.enums.ProductLoanTenure;
 import com.ezra.lending_app.domain.enums.ProductStatus;
 import com.ezra.lending_app.domain.enums.RepaymentFrequencyType;
 import jakarta.persistence.CascadeType;
@@ -14,9 +15,15 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generateReference;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "product")
 public class Product extends BaseEntity {
@@ -32,6 +39,10 @@ public class Product extends BaseEntity {
 
     @Column(name = "currency", length = 3, nullable = false)
     private Currency currency;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "loan_tenure", nullable = false)
+    private ProductLoanTenure loanTenure;
 
     @Column(name = "min_loan_amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal maxLoanAmount;
@@ -63,4 +74,15 @@ public class Product extends BaseEntity {
 
     @Column(name = "grace_period_after_loan_due_date_in_days", nullable = false)
     private int gracePeriodAfterLoanDueDateInDays;
+
+    @Column(name = "grace_period_before_loan_due_date_in_days", nullable = false)
+    private int gracePeriodBeforeLoanDueDateInDays;
+
+    public void activate() {
+        this.status = ProductStatus.ACTIVE;
+    }
+
+    public void deactivate() {
+        this.status = ProductStatus.DEACTIVATED;
+    }
 }
