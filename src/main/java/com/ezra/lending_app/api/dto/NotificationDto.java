@@ -7,10 +7,26 @@ public class NotificationDto {
     private String recipient;
     private String template;
     private String message;
+    private RecipientData recipientData;
 
     // sample loan notification template message
-    // success: Dear {{customerName}}, your loan application has been approved.
-    // Approved: Dear {{customerName}}, your {{productName}} loan of {{amount}} has been approved. Your [Repayment Tenure]-month repayment period starts on [Loan Start Date]. Call us at [Contact Number] for more information.
-    // Overdue: Dear {{customerName}}, your payment is overdue. A late fee will appear on your next bill. Please contact us on [phone number] if you have issues.
-    // due: Dear {{customerName}}}, your loan of {{Amount}} is due today {{DayMonthYear}}. A late fee of {{late_fee_amount}} will apply if not paid on time.
+    // payment received: Dear {{customerName}}, thank you for your payment of {{amount}} on {{paymentDate}}. Your payment has been successfully received and updated in your account.
+    // Approved: Dear {{customerName}}, your {{productName}} loan {{loanReference}} of {{amount}} has been issued. Please repay your loan by {{loanDueDate}}.
+    // Overdue: Dear {{customerName}}, your loan payment of {{amount}} is now {{daysOverdue}} days overdue. Please make the payment immediately to avoid further late fees and penalties.
+    // due: Dear {{customerName}}}, your loan of {{amount}} is due today. A late fee of {{lateFeeAmount}} will apply if not paid on time.
+    // before due: Dear {{customerName}}, this is a reminder that your loan payment of {{amount}} is due in {{daysUntilDue}} days. Please make the payment on time to avoid late fees.
+    // rejected: Dear {{customerName}}, your loan application {{loanReference}} worth {{amount}} has been rejected. Please contact us for more information.
+
+    static class RecipientData {
+        private String customerName;
+        private String currency;
+        private String amount;
+        private String paymentDate;
+        private String productName;
+        private String loanDueDate;
+        private String daysOverdue;
+        private String lateFeeAmount;
+        private String daysUntilDue;
+        private String loanReference;
+    }
 }
