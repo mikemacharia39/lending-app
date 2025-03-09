@@ -1,4 +1,4 @@
-package com.ezra.lending_app.api.dto;
+package com.ezra.lending_app.api.dto.product;
 
 import com.ezra.lending_app.domain.enums.FeeType;
 import com.ezra.lending_app.domain.enums.LoanFeeValueType;
