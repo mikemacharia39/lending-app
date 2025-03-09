@@ -12,6 +12,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -19,6 +22,9 @@ import java.util.List;
 
 import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generateReference;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "customer_loan")
 public class Loan extends BaseEntity {
@@ -60,7 +66,7 @@ public class Loan extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private LoanState state = LoanState.PENDING_APPROVAL;
+    private final LoanState state = LoanState.PENDING_APPROVAL;
 
     @OneToMany(mappedBy = "loan", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     private List<LoanInstallment> installment;
