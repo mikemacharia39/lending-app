@@ -1,7 +1,7 @@
 package com.ezra.lending_app.domain.services;
 
-import com.ezra.lending_app.api.dto.ProductRequestDto;
-import com.ezra.lending_app.api.dto.ProductResponseDto;
+import com.ezra.lending_app.api.dto.product.ProductRequestDto;
+import com.ezra.lending_app.api.dto.product.ProductResponseDto;
 import com.ezra.lending_app.domain.entities.Product;
 import com.ezra.lending_app.domain.mappers.product.ProductMapper;
 import com.ezra.lending_app.domain.repositories.ProductRepository;
@@ -29,10 +29,30 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductResponseDto getProduct(final String productCode) {
-        final Optional<Product> product = productRepository.findByProductCode(productCode);
-        if (product.isEmpty()) {
+        Product product = getProductInternal(productCode);
+        return productMapper.toDto(product);
+    }
+
+    public ProductResponseDto activateProduct(final String productCode) {
+        Product product = getProductInternal(productCode);
+        product.activate();
+        productRepository.save(product);
+        return productMapper.toDto(product);
+    }
+
+    @Transactional
+    public ProductResponseDto deactivateProduct(final String productCode) {
+        Product product = getProductInternal(productCode);
+        product.deactivate();
+        productRepository.save(product);
+        return productMapper.toDto(product);
+    }
+
+    public Product getProductInternal(final String productCode) {
+        final Optional<Product> productOpt = productRepository.findByProductCode(productCode);
+        if (productOpt.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The product with code %s was not found", productCode));
         }
-        return productMapper.toDto(product.get());
+        return productOpt.get();
     }
 }
