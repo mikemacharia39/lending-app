@@ -1,7 +1,7 @@
 package com.ezra.lending_app.domain.mappers.customer;
 
-import com.ezra.lending_app.api.dto.CustomerRequestDto;
-import com.ezra.lending_app.api.dto.CustomerResponseDto;
+import com.ezra.lending_app.api.dto.customer.CustomerRequestDto;
+import com.ezra.lending_app.api.dto.customer.CustomerResponseDto;
 import com.ezra.lending_app.domain.entities.Customer;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
