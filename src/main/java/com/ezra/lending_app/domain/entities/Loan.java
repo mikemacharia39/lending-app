@@ -14,6 +14,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generate
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 @Builder
 @Entity
 @Table(name = "customer_loan")
@@ -50,6 +52,9 @@ public class Loan extends BaseEntity {
 
     @Column(name = "full_loan_amount_plus_fees", nullable = false)
     private BigDecimal fullLoanAmountPlusFees;
+
+    @Column(name = "repaid_amount")
+    private BigDecimal repaidAmount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "loan_term_type", nullable = false)
