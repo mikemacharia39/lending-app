@@ -7,14 +7,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generateReference;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 @Builder
 @Entity
 @Table(name = "loan_repayment")
@@ -25,6 +28,8 @@ public class LoanRepaymentReceipt extends BaseEntity {
     @JoinColumn(name = "loan_id", nullable = false)
     @ManyToOne
     private Loan loan;
+
+    private BigDecimal amount;
 
     @Column(name = "payment_channel", nullable = false)
     private String paymentChannel;
