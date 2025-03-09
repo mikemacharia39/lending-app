@@ -27,9 +27,8 @@ public class Product extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private String description;
-
-    private BigDecimal interestRate;
 
     @Column(name = "currency", length = 3, nullable = false)
     private Currency currency;
@@ -52,7 +51,7 @@ public class Product extends BaseEntity {
     private LoanTerm maxLoanTermType;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Fee> fees;
+    private List<ProductFee> fees;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
