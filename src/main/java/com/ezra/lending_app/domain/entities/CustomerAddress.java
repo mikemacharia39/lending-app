@@ -2,12 +2,15 @@ package com.ezra.lending_app.domain.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "customer_address")
 public class CustomerAddress extends BaseEntity {
+
+    @JoinColumn(name = "customer_id", nullable = false)
     @ManyToOne
     private Customer customer;
 
