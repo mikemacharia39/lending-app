@@ -1,6 +1,9 @@
 package com.ezra.lending_app.api.dto;
 
-public record CustomerAddressRequestDto(
+import lombok.Builder;
+
+@Builder
+public record CustomerAddressDto(
         String addressLine,
         String town,
         String state,
