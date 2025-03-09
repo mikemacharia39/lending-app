@@ -29,10 +29,16 @@ public class CustomerService {
 
     @Transactional(readOnly = true)
     public CustomerResponseDto getCustomer(final String customerCode) {
+        final Customer customer = getCustomerEntity(customerCode);
+        return customerMapper.toDto(customer);
+    }
+
+    @Transactional
+    public Customer getCustomerEntity(final String customerCode) {
         final Optional<Customer> customer = customerRepository.findCustomerByCode(customerCode);
         if (customer.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The customer with code %s was not found", customerCode));
         }
-        return customerMapper.toDto(customer.get());
+        return customer.get();
     }
 }
