@@ -30,4 +30,5 @@ public class LoanResponseDto {
     private LoanState state;
     private List<LoanInstallmentDto> installment;
     private List<LoanRepaymentReceiptDto> repayments;
+    private Instant dateCreated;
 }
