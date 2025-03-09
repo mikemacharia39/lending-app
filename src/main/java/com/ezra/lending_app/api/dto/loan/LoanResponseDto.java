@@ -17,18 +17,18 @@ import java.util.List;
 @Builder
 public class LoanResponseDto {
     private String code;
-    private Long customerId;
-    private Long productId;
+    private String customerCode;
+    private String productCode;
     private BigDecimal requestedAmount;
     private BigDecimal disbursedAmount;
     private List<LoanFeeDto> loanFees;
     private BigDecimal fullLoanAmountPlusFees;
+    private BigDecimal repaidAmount;
     private LoanTerm loanTermType;
     private int loanPeriod;
     private Instant disbursedDate;
     private Instant dueDate;
     private LoanState state;
     private List<LoanInstallmentDto> installment;
-    private List<LoanRepaymentReceiptDto> repayments;
     private Instant dateCreated;
 }
