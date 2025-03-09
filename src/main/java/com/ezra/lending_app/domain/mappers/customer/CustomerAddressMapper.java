@@ -1,6 +1,6 @@
 package com.ezra.lending_app.domain.mappers.customer;
 
-import com.ezra.lending_app.api.dto.CustomerAddressDto;
+import com.ezra.lending_app.api.dto.customer.CustomerAddressDto;
 import com.ezra.lending_app.domain.entities.CustomerAddress;
 
 public abstract class CustomerAddressMapper {
