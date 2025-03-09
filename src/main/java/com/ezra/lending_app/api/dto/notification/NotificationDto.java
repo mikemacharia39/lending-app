@@ -1,4 +1,4 @@
-package com.ezra.lending_app.api.dto;
+package com.ezra.lending_app.api.dto.notification;
 
 import lombok.Builder;
 
