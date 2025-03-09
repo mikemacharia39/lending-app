@@ -1,4 +1,4 @@
-package com.ezra.lending_app.api.dto;
+package com.ezra.lending_app.api.dto.loan;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
