@@ -2,6 +2,7 @@ package com.ezra.lending_app.domain.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
@@ -15,6 +16,7 @@ public class LoanRepaymentReceipt extends BaseEntity {
     @Column(nullable = false, unique = true)
     private final String code = generateReference();
 
+    @JoinColumn(name = "loan_id", nullable = false)
     @ManyToOne
     private Loan loan;
 
