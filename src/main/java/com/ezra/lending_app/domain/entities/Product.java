@@ -7,10 +7,12 @@ import java.util.List;
 import com.ezra.lending_app.domain.enums.LoanTerm;
 import com.ezra.lending_app.domain.enums.ProductStatus;
 import com.ezra.lending_app.domain.enums.RepaymentFrequencyType;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generateReference;
@@ -49,6 +51,7 @@ public class Product extends BaseEntity {
     @Column(name = "max_loan_term_type", nullable = false)
     private LoanTerm maxLoanTermType;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Fee> fees;
 
     @Enumerated(EnumType.STRING)
