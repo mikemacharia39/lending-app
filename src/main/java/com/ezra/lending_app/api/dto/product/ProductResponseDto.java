@@ -1,4 +1,4 @@
-package com.ezra.lending_app.api.dto;
+package com.ezra.lending_app.api.dto.product;
 
 import java.math.BigDecimal;
 import java.time.Instant;
