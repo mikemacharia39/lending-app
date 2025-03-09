@@ -29,12 +29,12 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductResponseDto getProduct(final String productCode) {
-        Product product = getProductInternal(productCode);
+        Product product = getProductEntity(productCode);
         return productMapper.toDto(product);
     }
 
     public ProductResponseDto activateProduct(final String productCode) {
-        Product product = getProductInternal(productCode);
+        Product product = getProductEntity(productCode);
         product.activate();
         productRepository.save(product);
         return productMapper.toDto(product);
@@ -42,13 +42,13 @@ public class ProductService {
 
     @Transactional
     public ProductResponseDto deactivateProduct(final String productCode) {
-        Product product = getProductInternal(productCode);
+        Product product = getProductEntity(productCode);
         product.deactivate();
         productRepository.save(product);
         return productMapper.toDto(product);
     }
 
-    public Product getProductInternal(final String productCode) {
+    public Product getProductEntity(final String productCode) {
         final Optional<Product> productOpt = productRepository.findByProductCode(productCode);
         if (productOpt.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The product with code %s was not found", productCode));
