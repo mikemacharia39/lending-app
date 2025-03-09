@@ -17,12 +17,14 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generateReference;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 @Builder
 @Entity
 @Table(name = "product")
@@ -45,6 +47,9 @@ public class Product extends BaseEntity {
     private ProductLoanTenure loanTenure;
 
     @Column(name = "min_loan_amount", nullable = false, precision = 19, scale = 2)
+    private BigDecimal minLoanAmount;
+
+    @Column(name = "max_loan_amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal maxLoanAmount;
 
     @Column(name = "min_loan_term_duration", nullable = false)
@@ -84,5 +89,9 @@ public class Product extends BaseEntity {
 
     public void deactivate() {
         this.status = ProductStatus.DEACTIVATED;
+    }
+
+    public boolean isActive() {
+        return this.status == ProductStatus.ACTIVE;
     }
 }
