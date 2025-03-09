@@ -1,4 +1,4 @@
-package com.ezra.lending_app.api.dto;
+package com.ezra.lending_app.api.dto.customer;
 
 import java.util.List;
 
