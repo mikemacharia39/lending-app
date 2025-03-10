@@ -1,0 +1,101 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="v0.0.1-SNAPSHOT-product-1" author="mikemacharia39">
+        <createTable tableName="product">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="code" type="VARCHAR(30)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency" type="VARCHAR(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="loan_tenure" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="min_loan_amount" type="DECIMAL(19, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="max_loan_amount" type="DECIMAL(19, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="min_loan_term_duration" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="min_loan_term_type" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="max_loan_term_duration" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="max_loan_term_type" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="repayment_frequency" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="grace_period_after_loan_due_date_in_days" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="grace_period_before_loan_due_date_in_days" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_modified" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="v0.0.1-SNAPSHOT-product-fee-2" author="mikemacharia39">
+        <createTable tableName="fee">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="product_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="fee_type" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value_type" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="DECIMAL(19, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="applied_at_origination" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="daily_accrual" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_modified" type="TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="fee"
+                                 baseColumnNames="product_id"
+                                 constraintName="fk_fee_product"
+                                 referencedTableName="product"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

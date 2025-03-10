@@ -1,0 +1,41 @@
+server:
+  port: 5002
+  shutdown: graceful
+
+spring:
+  application:
+    name: Lending App
+  profiles:
+    active: dev
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3308/lending
+    username: root
+    password:
+  jpa:
+    open-in-view: false
+
+  liquibase:
+    enabled: true
+    changeLog: classpath:db/changelog/changelog.xml
+
+management:
+  security:
+    enabled: false
+  endpoints:
+    enabled-by-default: false
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    info:
+      enabled: true
+    health:
+      enabled: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
