@@ -20,7 +20,7 @@ import java.time.Instant;
 @Builder
 @Entity
 @Table(name = "loan_fee")
-public class LoanFee {
+public class LoanFee extends BaseEntity {
     @JoinColumn(name = "loan_id", nullable = false)
     @ManyToOne
     private Loan loan;
