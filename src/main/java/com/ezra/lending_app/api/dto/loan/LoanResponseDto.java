@@ -24,7 +24,7 @@ public class LoanResponseDto {
     private List<LoanFeeDto> loanFees;
     private BigDecimal fullLoanAmountPlusFees;
     private BigDecimal repaidAmount;
-    private LoanTerm loanTermType;
+    private LoanTerm loanTerm;
     private int loanPeriod;
     private Instant disbursedDate;
     private Instant dueDate;
