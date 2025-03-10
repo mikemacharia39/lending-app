@@ -5,7 +5,8 @@ public enum NotificationType {
     LOAN_BEFORE_DUE,
     LOAN_DUE,
     PAST_DUE,
-    LOAN_APPROVAL,
+    LOAN_PENDING_APPROVAL,
+    LOAN_APPROVED,
     LOAN_COMPLETED,
     LOAN_REJECTION,
     WRITTEN_OFF
