@@ -7,5 +7,6 @@ public enum LoanState {
     CANCELLED,
     OVERDUE,
     WRITTEN_OFF,
-    REJECTED
+    REJECTED,
+    DISCARDED
 }
