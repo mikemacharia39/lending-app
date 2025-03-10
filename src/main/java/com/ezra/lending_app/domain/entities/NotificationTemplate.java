@@ -8,12 +8,14 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generateReference;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 @Builder
 @Entity
 @Table(name = "notification_template")
