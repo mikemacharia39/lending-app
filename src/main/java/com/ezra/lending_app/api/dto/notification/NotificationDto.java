@@ -1,8 +1,12 @@
 package com.ezra.lending_app.api.dto.notification;
 
 import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
 @Builder
+@Setter
 public class NotificationDto {
     private String recipient;
     private String template;
@@ -17,7 +21,9 @@ public class NotificationDto {
     // before due: Dear {{customerName}}, this is a reminder that your loan payment of {{amount}} is due in {{daysUntilDue}} days. Please make the payment on time to avoid late fees.
     // rejected: Dear {{customerName}}, your loan application {{loanReference}} worth {{amount}} has been rejected. Please contact us for more information.
 
-    static class RecipientData {
+    @Getter
+    @Builder
+    public static class RecipientData {
         private String customerName;
         private String currency;
         private String amount;
