@@ -71,11 +71,15 @@ public class Loan extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private final LoanState state = LoanState.PENDING_APPROVAL;
+    private LoanState state = LoanState.PENDING_APPROVAL;
 
     @OneToMany(mappedBy = "loan", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     private List<LoanInstallment> installment;
 
     @OneToMany(mappedBy = "loan")
     private List<LoanRepaymentReceipt> repayments;
+
+    public void transitionState(LoanState newLoanState) {
+        this.state = newLoanState;
+    }
 }
