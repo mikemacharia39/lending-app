@@ -6,16 +6,18 @@ import com.ezra.lending_app.api.dto.loan.LoanRequestDto;
 import com.ezra.lending_app.api.dto.loan.LoanResponseDto;
 import com.ezra.lending_app.domain.entities.Customer;
 import com.ezra.lending_app.domain.entities.Loan;
+import com.ezra.lending_app.domain.entities.LoanFee;
+import com.ezra.lending_app.domain.entities.LoanInstallment;
 import com.ezra.lending_app.domain.entities.LoanRepaymentReceipt;
 import com.ezra.lending_app.domain.entities.Product;
 import com.ezra.lending_app.domain.entities.ProductFee;
+import com.ezra.lending_app.domain.enums.FeeType;
 import com.ezra.lending_app.domain.enums.LoanState;
 import com.ezra.lending_app.domain.enums.ProductLoanTenure;
 import com.ezra.lending_app.domain.enums.RepaymentFrequencyType;
 import com.ezra.lending_app.domain.mappers.loan.LoanMapper;
 import com.ezra.lending_app.domain.repositories.LoanRepaymentReceiptRepository;
 import com.ezra.lending_app.domain.repositories.LoanRepository;
-import com.ezra.lending_app.domain.services.notification.INotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -94,16 +96,88 @@ public class LoanService {
      * Apply for a loan by checking the loan eligibility and saving the loan details.
      * If the customer's loan request is lesser than the amount they are eligible for, the loan amount will be auto approved
      * If greater, the loan amount will be sent for manual approval
-     * @param productCode product code
+     *
+     * @param productCode  product code
      * @param customerCode customer code
-     * @param loanRequest loan request details
+     * @param loanRequest  loan request details
      * @return loan results
      */
     public LoanResponseDto applyForLoan(final String productCode, final String customerCode, final LoanRequestDto loanRequest) {
-        LoanResponseDto loanResponseDto = checkLoanEligibility(productCode, customerCode);
-        Loan loan = loanMapper.entity(loanResponseDto);
+        LoanResponseDto loanEligibility = checkLoanEligibility(productCode, customerCode);
+        Customer customer = customerService.getCustomerEntity(customerCode);
+        Product product = productService.getProductEntity(productCode);
+
+        BigDecimal requestedAmount = loanRequest.requestedAmount();
+        List<LoanFeeDto> loanFees = calculateLoanFees(product.getFees(), requestedAmount);
+        BigDecimal fullLoanAmountPlusFees = requestedAmount.add(loanFees.stream()
+                .map(LoanFeeDto::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+        Instant disbursedDate = Instant.now();
+        Instant dueDate = disbursedDate.plus(Duration.ofDays(product.getMaxLoanTermDuration()));
+
+        BigDecimal disbursedAmount = requestedAmount; // Assuming disbursed amount is the same as requested amount initially
+        // if there is a service and the fee applies at origination, the disbursed amount will be the requested amount minus the service fee
+        // that also means the full loan amount will be reduced if fee is applied at origination
+        if (!loanFees.isEmpty()) {
+            ProductFee serviceFee = product.getFees().stream()
+                    .filter(fee -> fee.getFeeType() == FeeType.SERVICE_FEE && fee.isAppliedAtOrigination())
+                    .findFirst()
+                    .orElse(null);
+            if (serviceFee != null) {
+                BigDecimal serviceFeeAmount = getAmountFromFee(serviceFee, requestedAmount);
+                disbursedAmount = requestedAmount.subtract(serviceFeeAmount);
+                fullLoanAmountPlusFees = fullLoanAmountPlusFees.subtract(serviceFeeAmount);
+            }
+        }
+
+        // if the loan requested by a customer is less than the amount they are eligible for and it's a flexible loan, auto approve the loan
+        LoanState loanState = requestedAmount.compareTo(loanEligibility.getRequestedAmount()) <= 0
+                    && product.getLoanTenure() == ProductLoanTenure.FLEXIBLE_TENURE
+                ? LoanState.OPEN
+                : LoanState.PENDING_APPROVAL;
+
+        Loan loan = Loan.builder()
+                .product(product)
+                .customer(customer)
+                .requestedAmount(requestedAmount)
+                .disbursedAmount(disbursedAmount)
+                .fullLoanAmountPlusFees(fullLoanAmountPlusFees)
+                .repaidAmount(BigDecimal.ZERO)
+                .loanTerm(loanRequest.loanTerm())
+                .loanPeriod(loanRequest.loanPeriod())
+                .disbursedDate(disbursedDate)
+                .dueDate(dueDate)
+                .state(loanState)
+                .build();
+
+        loan.setInstallment(loanInstallmentDtoToEntity(calculateLoanInstallments(product, fullLoanAmountPlusFees), loan));
+        loan.setLoanFees(loanFeeDtoToEntity(loanFees, loan));
         loanRepository.save(loan);
-        return loanResponseDto;
+
+        loanNotificationService.sendLoanStateChangeNotification(loan);
+
+        return loanMapper.dto(loan);
+    }
+
+    private List<LoanInstallment> loanInstallmentDtoToEntity(List<LoanInstallmentDto> loanInstallments, Loan loan) {
+        return loanInstallments.stream()
+                .map(loanInstallmentDto -> LoanInstallment.builder()
+                        .loan(loan)
+                        .amount(loanInstallmentDto.getAmount())
+                        .dueDate(loanInstallmentDto.getDueDate())
+                        .build())
+                .toList();
+    }
+
+    private List<LoanFee> loanFeeDtoToEntity(List<LoanFeeDto> loanFees, Loan loan) {
+        return loanFees.stream()
+                .map(loanFeeDto -> LoanFee.builder()
+                        .loan(loan)
+                        .feeType(loanFeeDto.getFeeType())
+                        .amount(loanFeeDto.getAmount())
+                        .appliedDate(loanFeeDto.getAppliedDate())
+                        .build())
+                .toList();
     }
 
     public LoanResponseDto loanWorkflow(final String loanCode, final LoanState newLoanState) {
@@ -123,6 +197,7 @@ public class LoanService {
      * Calculate creditworthiness based on repayment punctuality. The creditworthiness is assessed by evaluating
      * the percentage of on-time payments, overdue payments, and written-off loans.
      * Weights are assigned to each category to determine the final creditworthiness value.
+     *
      * @param loanHistory List of loans for the customer
      * @return Creditworthiness value
      */
@@ -219,7 +294,8 @@ public class LoanService {
 
     /**
      * Assess loan fees based on the product fees and requested amount.
-     * @param productFees List of product fees
+     *
+     * @param productFees     List of product fees
      * @param requestedAmount Requested loan amount
      * @return the evaluated loan amount from the product fees
      */
