@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -26,6 +27,7 @@ import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generate
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 @Builder
 @Entity
 @Table(name = "customer_loan")
@@ -58,7 +60,7 @@ public class Loan extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "loan_term_type", nullable = false)
-    private LoanTerm loanTermType;
+    private LoanTerm loanTerm;
 
     @Column(name = "term_duration", nullable = false)
     private int loanPeriod;
