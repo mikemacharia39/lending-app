@@ -2,6 +2,7 @@ package com.ezra.lending_app.domain.services;
 
 import com.ezra.lending_app.api.dto.loan.LoanFeeDto;
 import com.ezra.lending_app.api.dto.loan.LoanInstallmentDto;
+import com.ezra.lending_app.api.dto.loan.LoanRequestDto;
 import com.ezra.lending_app.api.dto.loan.LoanResponseDto;
 import com.ezra.lending_app.domain.entities.Customer;
 import com.ezra.lending_app.domain.entities.Loan;
@@ -14,6 +15,7 @@ import com.ezra.lending_app.domain.enums.RepaymentFrequencyType;
 import com.ezra.lending_app.domain.mappers.loan.LoanMapper;
 import com.ezra.lending_app.domain.repositories.LoanRepaymentReceiptRepository;
 import com.ezra.lending_app.domain.repositories.LoanRepository;
+import com.ezra.lending_app.domain.services.notification.INotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,8 @@ public class LoanService {
     private final LoanMapper loanMapper;
     private final ProductService productService;
     private final CustomerService customerService;
+    private final ValidationService validationService;
+    private final LoanNotificationService loanNotificationService;
     private final LoanRepaymentReceiptRepository loanRepaymentReceiptRepository;
 
     public LoanResponseDto checkLoanEligibility(String productCode, String customerCode) {
@@ -69,7 +73,7 @@ public class LoanService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The calculated loan amount is outside the allowed range for this product");
         }
 
-        final List<LoanFeeDto> loanFees = assessLoanFees(product.getFees(), loanAmount);
+        final List<LoanFeeDto> loanFees = calculateLoanFees(product.getFees(), loanAmount);
         final BigDecimal fullLoanAmount = loanAmount.add(loanFees.stream()
                 .map(LoanFeeDto::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
@@ -84,6 +88,35 @@ public class LoanService {
                 .loanFees(loanFees)
                 .installment(calculateLoanInstallments(product, fullLoanAmount))
                 .build();
+    }
+
+    /**
+     * Apply for a loan by checking the loan eligibility and saving the loan details.
+     * If the customer's loan request is lesser than the amount they are eligible for, the loan amount will be auto approved
+     * If greater, the loan amount will be sent for manual approval
+     * @param productCode product code
+     * @param customerCode customer code
+     * @param loanRequest loan request details
+     * @return loan results
+     */
+    public LoanResponseDto applyForLoan(final String productCode, final String customerCode, final LoanRequestDto loanRequest) {
+        LoanResponseDto loanResponseDto = checkLoanEligibility(productCode, customerCode);
+        Loan loan = loanMapper.entity(loanResponseDto);
+        loanRepository.save(loan);
+        return loanResponseDto;
+    }
+
+    public LoanResponseDto loanWorkflow(final String loanCode, final LoanState newLoanState) {
+        Loan loan = loanRepository.findByLoanCode(loanCode)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found"));
+
+        validationService.validateLoanStateTransition(loan.getState(), newLoanState);
+        loan.transitionState(newLoanState);
+        loanRepository.save(loan);
+
+        loanNotificationService.sendLoanStateChangeNotification(loan);
+
+        return loanMapper.dto(loan);
     }
 
     /**
@@ -190,7 +223,7 @@ public class LoanService {
      * @param requestedAmount Requested loan amount
      * @return the evaluated loan amount from the product fees
      */
-    public List<LoanFeeDto> assessLoanFees(List<ProductFee> productFees, BigDecimal requestedAmount) {
+    public List<LoanFeeDto> calculateLoanFees(List<ProductFee> productFees, BigDecimal requestedAmount) {
         List<LoanFeeDto> loanFees = new ArrayList<>();
         for (ProductFee productFee : productFees) {
             BigDecimal amount = getAmountFromFee(productFee, requestedAmount);
