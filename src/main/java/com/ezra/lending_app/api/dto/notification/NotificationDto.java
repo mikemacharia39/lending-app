@@ -20,6 +20,7 @@ public class NotificationDto {
     // due: Dear {{customerName}}}, your loan of {{amount}} is due today. A late fee of {{lateFeeAmount}} will apply if not paid on time.
     // before due: Dear {{customerName}}, this is a reminder that your loan payment of {{amount}} is due in {{daysUntilDue}} days. Please make the payment on time to avoid late fees.
     // rejected: Dear {{customerName}}, your loan application {{loanReference}} worth {{amount}} has been rejected. Please contact us for more information.
+    // loan completed: Dear {{customerName}}, your loan {{loanReference}} has been fully repaid. Thank you for your business.
 
     @Getter
     @Builder
