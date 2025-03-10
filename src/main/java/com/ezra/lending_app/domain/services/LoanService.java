@@ -159,6 +159,19 @@ public class LoanService {
         return loanMapper.dto(loan);
     }
 
+    public LoanResponseDto loanWorkflow(final String loanCode, final LoanState newLoanState) {
+        Loan loan = loanRepository.findByLoanCode(loanCode)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found"));
+
+        validationService.validateLoanStateTransition(loan.getState(), newLoanState);
+        loan.transitionState(newLoanState);
+        loanRepository.save(loan);
+
+        loanNotificationService.sendLoanStateChangeNotification(loan);
+
+        return loanMapper.dto(loan);
+    }
+
     private List<LoanInstallment> loanInstallmentDtoToEntity(List<LoanInstallmentDto> loanInstallments, Loan loan) {
         return loanInstallments.stream()
                 .map(loanInstallmentDto -> LoanInstallment.builder()
@@ -178,19 +191,6 @@ public class LoanService {
                         .appliedDate(loanFeeDto.getAppliedDate())
                         .build())
                 .toList();
-    }
-
-    public LoanResponseDto loanWorkflow(final String loanCode, final LoanState newLoanState) {
-        Loan loan = loanRepository.findByLoanCode(loanCode)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found"));
-
-        validationService.validateLoanStateTransition(loan.getState(), newLoanState);
-        loan.transitionState(newLoanState);
-        loanRepository.save(loan);
-
-        loanNotificationService.sendLoanStateChangeNotification(loan);
-
-        return loanMapper.dto(loan);
     }
 
     /**
