@@ -14,5 +14,5 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
 
     List<Loan> findAllByCustomerCode(String customerCode);
 
-    List<Loan> findAllByStatusIn(List<LoanState> statuses);
+    List<Loan> findAllByStateIn(List<LoanState> states);
 }
