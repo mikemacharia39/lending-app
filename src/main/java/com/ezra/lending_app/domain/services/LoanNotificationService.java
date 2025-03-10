@@ -28,6 +28,27 @@ public class LoanNotificationService {
         CompletableFuture.runAsync(() -> sendNotification(loan));
     }
 
+    public void sendLoanNotification(final Loan loan, final NotificationType notificationType) {
+        NotificationTemplate template = notificationTemplateRepository.findByNotificationType(notificationType)
+                .orElseThrow(() -> new IllegalStateException("Notification template not found for type: " + notificationType));
+
+        NotificationDto notification = NotificationDto.builder()
+                .template(template.getMessageTemplate())
+                .recipientData(NotificationDto.RecipientData.builder()
+                        .customerName(loan.getCustomer().getFirstName())
+                        .amount(loan.getRequestedAmount().toString())
+                        .loanDueDate(loan.getDueDate().toString())
+                        .loanReference(loan.getCode())
+                        .build())
+                .build();
+
+        String message = formulateMessage(template.getMessageTemplate(), notification, notificationType);
+        notification.setMessage(message);
+        notification.setRecipient(getNotificationMedia(loan.getCustomer()));
+
+        notifyCustomer(loan.getCustomer(), notification);
+    }
+
     private void sendNotification(final Loan loan) {
         NotificationType notificationType = getNotificationTypeForLoanState(loan.getState());
         NotificationTemplate template = notificationTemplateRepository.findByNotificationType(notificationType)
@@ -42,11 +63,15 @@ public class LoanNotificationService {
                         .build())
                 .build();
 
-        String message = formulateMessage(template.getMessageTemplate(), notification);
+        String message = formulateMessage(template.getMessageTemplate(), notification, notificationType);
         notification.setMessage(message);
         notification.setRecipient(getNotificationMedia(loan.getCustomer()));
 
-        NotificationChannel preferredChannel = loan.getCustomer().getPreferredNotificationChannel();
+        notifyCustomer(loan.getCustomer(), notification);
+    }
+
+    private void notifyCustomer(Customer customer, NotificationDto notification) {
+        NotificationChannel preferredChannel = customer.getPreferredNotificationChannel();
         INotificationService notificationService = notificationChannelServices.get(preferredChannel);
         if (notificationService != null) {
             notificationService.sendNotification(notification);
@@ -57,20 +82,43 @@ public class LoanNotificationService {
 
     private NotificationType getNotificationTypeForLoanState(LoanState loanState) {
         return switch (loanState) {
-            case OPEN -> NotificationType.LOAN_APPROVAL;
+            case OPEN -> NotificationType.LOAN_APPROVED;
             case CLOSED -> NotificationType.LOAN_COMPLETED;
             case REJECTED -> NotificationType.LOAN_REJECTION;
             case OVERDUE -> NotificationType.PAST_DUE;
             case WRITTEN_OFF -> NotificationType.WRITTEN_OFF;
+            case PENDING_APPROVAL -> NotificationType.LOAN_PENDING_APPROVAL;
             default -> throw new IllegalArgumentException("Unsupported loan state: " + loanState);
         };
     }
 
-    private String formulateMessage(String template, NotificationDto notificationDto) {
-        return template.replace("{{customerName}}", notificationDto.getRecipientData().getCustomerName())
+    private String formulateMessage(String template, NotificationDto notificationDto, NotificationType notificationType) {
+        String message = template.replace("{{customerName}}", notificationDto.getRecipientData().getCustomerName())
                 .replace("{{amount}}", notificationDto.getRecipientData().getAmount())
                 .replace("{{loanReference}}", notificationDto.getRecipientData().getLoanReference())
                 .replace("{{loanDueDate}}", notificationDto.getRecipientData().getLoanDueDate());
+
+        switch (notificationType) {
+            case SUCCESS_PAYMENT:
+                message = message.replace("{{paymentDate}}", notificationDto.getRecipientData().getPaymentDate());
+                break;
+            case LOAN_APPROVED:
+                message = message.replace("{{productName}}", notificationDto.getRecipientData().getProductName());
+                break;
+            case PAST_DUE:
+                message = message.replace("{{daysOverdue}}", notificationDto.getRecipientData().getDaysOverdue());
+                break;
+            case LOAN_DUE:
+                message = message.replace("{{lateFeeAmount}}", notificationDto.getRecipientData().getLateFeeAmount());
+                break;
+            case LOAN_BEFORE_DUE:
+                message = message.replace("{{daysUntilDue}}", notificationDto.getRecipientData().getDaysUntilDue());
+                break;
+            default:
+                break;
+        }
+
+        return message;
     }
 
     private String getNotificationMedia(Customer customer) {
