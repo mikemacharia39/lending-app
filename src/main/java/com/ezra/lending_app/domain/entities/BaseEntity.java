@@ -32,7 +32,7 @@ public abstract class BaseEntity implements Serializable {
     @CreatedDate
     @Column(name = "date_created", nullable = false, updatable = false, columnDefinition = "DATETIME")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private Instant dateCreated = Instant.now();
+    private Instant dateCreated;
 
     @LastModifiedDate
     @Column(name = "date_modified", columnDefinition = "DATETIME")
