@@ -9,6 +9,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
@@ -16,6 +17,7 @@ import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generate
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 @SuperBuilder(toBuilder = true)
 @Entity
 @Table(name = "loan_installment")
