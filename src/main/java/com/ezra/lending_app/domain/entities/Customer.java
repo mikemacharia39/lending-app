@@ -14,6 +14,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -27,6 +28,7 @@ import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generate
 @Entity
 @Table(name = "customer")
 public class Customer extends BaseEntity {
+    @Builder.Default
     @Column(nullable = false, unique = true)
     private final String code = generateReference();
 
@@ -47,6 +49,7 @@ public class Customer extends BaseEntity {
     @Column(name = "identification_number", nullable = false)
     private String identificationNumber;
 
+    @Builder.Default
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CustomerAddress> addresses = new ArrayList<>();;
 
