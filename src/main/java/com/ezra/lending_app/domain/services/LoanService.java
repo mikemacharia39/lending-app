@@ -1,5 +1,13 @@
 package com.ezra.lending_app.domain.services;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.ezra.lending_app.api.dto.loan.LoanFeeDto;
 import com.ezra.lending_app.api.dto.loan.LoanInstallmentDto;
 import com.ezra.lending_app.api.dto.loan.LoanRequestDto;
@@ -24,13 +32,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-
 @RequiredArgsConstructor
 @Transactional
 @Service
@@ -52,7 +53,7 @@ public class LoanService {
         }
 
         // Fetch the customer's repayment history
-        List<Loan> loanHistory = loanRepository.findAllByCustomerCode(customerCode);
+        List<Loan> loanHistory = loanRepository.findAllLoansByCustomerCode(customerCode);
 
         // Get the most recent loan amount
         BigDecimal lastLoanAmount = BigDecimal.ZERO;
@@ -160,7 +161,7 @@ public class LoanService {
     }
 
     public LoanResponseDto loanWorkflow(final String loanCode, final LoanState newLoanState) {
-        Loan loan = loanRepository.findByLoanCode(loanCode)
+        Loan loan = loanRepository.findByCode(loanCode)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found"));
 
         validationService.validateLoanStateTransition(loan.getState(), newLoanState);
@@ -179,7 +180,7 @@ public class LoanService {
                         .amount(loanInstallmentDto.getAmount())
                         .dueDate(loanInstallmentDto.getDueDate())
                         .build())
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private List<LoanFee> loanFeeDtoToEntity(List<LoanFeeDto> loanFees, Loan loan) {
@@ -190,7 +191,7 @@ public class LoanService {
                         .amount(loanFeeDto.getAmount())
                         .appliedDate(loanFeeDto.getAppliedDate())
                         .build())
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**
@@ -271,7 +272,7 @@ public class LoanService {
     }
 
     public List<LoanResponseDto> getCustomerLoan(String customerCode) {
-        List<Loan> loans = loanRepository.findAllByCustomerCode(customerCode);
+        List<Loan> loans = loanRepository.findAllLoansByCustomerCode(customerCode);
         return loans.stream()
                 .map(loanMapper::dto)
                 .toList();
