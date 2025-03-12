@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
@@ -19,6 +20,7 @@ import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generate
 @Entity
 @Table(name = "loan_installment")
 public class LoanInstallment extends BaseEntity {
+    @Builder.Default
     @Column(nullable = false, unique = true)
     private final String code = generateReference();
 
