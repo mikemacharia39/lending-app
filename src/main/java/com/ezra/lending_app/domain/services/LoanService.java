@@ -48,9 +48,7 @@ public class LoanService {
         Customer customer = customerService.getCustomerEntity(customerCode);
         Product product = productService.getProductEntity(productCode);
 
-        if (!product.isActive()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This product is no longer available");
-        }
+        validationService.validateLoanApplicationRequest(product);
 
         // Fetch the customer's repayment history
         List<Loan> loanHistory = loanRepository.findAllLoansByCustomerCode(customerCode);
@@ -318,7 +316,7 @@ public class LoanService {
         BigDecimal amount = BigDecimal.ZERO;
         switch (productFee.getValueType()) {
             case PERCENTAGE:
-                amount = requestedAmount.multiply(productFee.getValue());
+                amount = productFee.getValue().divide(BigDecimal.valueOf(100), RoundingMode.HALF_EVEN).multiply(requestedAmount);
                 break;
             case FIXED_AMOUNT:
                 amount = productFee.getValue();
