@@ -6,7 +6,7 @@
 
     <changeSet id="v0.0.1-SNAPSHOT-notification-template-seed" author="mikemacharia39" runOnChange="true">
         <loadUpdateData primaryKey="id"
-                        file="seed/notification_template-data.csv"
+                        file="seed/notification-template-data.csv"
                         separator=";"
                         tableName="notification_template" relativeToChangelogFile="true"/>
     </changeSet>
