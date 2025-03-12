@@ -22,7 +22,6 @@ import com.ezra.lending_app.domain.entities.ProductFee;
 import com.ezra.lending_app.domain.enums.FeeType;
 import com.ezra.lending_app.domain.enums.LoanState;
 import com.ezra.lending_app.domain.enums.ProductLoanTenure;
-import com.ezra.lending_app.domain.enums.RepaymentFrequencyType;
 import com.ezra.lending_app.domain.mappers.loan.LoanMapper;
 import com.ezra.lending_app.domain.repositories.LoanRepaymentReceiptRepository;
 import com.ezra.lending_app.domain.repositories.LoanRepository;
@@ -84,7 +83,12 @@ public class LoanService {
                 .productCode(productCode)
                 .requestedAmount(loanAmount)
                 .disbursedAmount(loanAmount)
+                .loanTerm(product.getMinLoanTermType())
+                .disbursedDate(Instant.now())
+                .loanPeriod(product.getMinLoanTermDuration())
+                .dueDate(Instant.now().plus(Duration.ofDays(product.getMinLoanTermDuration())))
                 .fullLoanAmountPlusFees(fullLoanAmount)
+                .state(LoanState.PENDING_APPROVAL)
                 .repaidAmount(BigDecimal.ZERO)
                 .loanFees(loanFees)
                 .installment(calculateLoanInstallments(product, fullLoanAmount))
@@ -112,7 +116,7 @@ public class LoanService {
                 .map(LoanFeeDto::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
         Instant disbursedDate = Instant.now();
-        Instant dueDate = disbursedDate.plus(Duration.ofDays(product.getMaxLoanTermDuration()));
+        Instant dueDate = disbursedDate.plus(Duration.ofDays(loanRequest.loanPeriod()));
 
         BigDecimal disbursedAmount = requestedAmount; // Assuming disbursed amount is the same as requested amount initially
         // if there is a service and the fee applies at origination, the disbursed amount will be the requested amount minus the service fee
@@ -131,7 +135,7 @@ public class LoanService {
 
         // if the loan requested by a customer is less than the amount they are eligible for and it's a flexible loan, auto approve the loan
         LoanState loanState = requestedAmount.compareTo(loanEligibility.getRequestedAmount()) <= 0
-                    && product.getLoanTenure() == ProductLoanTenure.FLEXIBLE_TENURE
+                && product.getLoanTenure() == ProductLoanTenure.FLEXIBLE_TENURE
                 ? LoanState.OPEN
                 : LoanState.PENDING_APPROVAL;
 
@@ -158,6 +162,12 @@ public class LoanService {
         return loanMapper.dto(loan);
     }
 
+    public LoanResponseDto getLoanDetails(final String loanCode) {
+        Loan loan = loanRepository.findByCode(loanCode)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found"));
+        return loanMapper.dto(loan);
+    }
+
     public LoanResponseDto loanWorkflow(final String loanCode, final LoanState newLoanState) {
         Loan loan = loanRepository.findByCode(loanCode)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found"));
@@ -176,7 +186,7 @@ public class LoanService {
                 .map(loanInstallmentDto -> LoanInstallment.builder()
                         .loan(loan)
                         .amount(loanInstallmentDto.getAmount())
-                        .dueDate(loanInstallmentDto.getDueDate())
+                        .dueDate(loan.getDueDate())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -207,6 +217,11 @@ public class LoanService {
         long overdueLoans = 0;
         long writtenOffLoans = 0;
         long allLoans = loanHistory.size();
+
+        if (loanHistory.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
         for (Loan loan : loanHistory) {
             if (loan.getState() == LoanState.CLOSED) {
                 successfullyPaidLoans++;
@@ -278,13 +293,11 @@ public class LoanService {
 
     public List<LoanInstallmentDto> calculateLoanInstallments(Product product, BigDecimal loanAmount) {
         List<LoanInstallmentDto> installments = new ArrayList<>();
-
         ProductLoanTenure loanTenure = product.getLoanTenure();
-        RepaymentFrequencyType repaymentFrequency = product.getRepaymentFrequency();
         if (loanTenure == ProductLoanTenure.FLEXIBLE_TENURE) {
             LoanInstallmentDto installment = LoanInstallmentDto.builder()
                     .amount(loanAmount)
-                    .dueDate(Instant.now().plus(Duration.ofDays(product.getMaxLoanTermDuration())))
+                    .dueDate(Instant.now().plus(Duration.ofDays(product.getMinLoanTermDuration())))
                     .build();
             installments.add(installment);
         }
@@ -300,15 +313,18 @@ public class LoanService {
      */
     public List<LoanFeeDto> calculateLoanFees(List<ProductFee> productFees, BigDecimal requestedAmount) {
         List<LoanFeeDto> loanFees = new ArrayList<>();
-        for (ProductFee productFee : productFees) {
-            BigDecimal amount = getAmountFromFee(productFee, requestedAmount);
-            LoanFeeDto loanFeeDto = LoanFeeDto.builder()
-                    .feeType(productFee.getFeeType())
-                    .amount(amount)
-                    .appliedDate(Instant.now())
-                    .build();
-            loanFees.add(loanFeeDto);
-        }
+
+        productFees.stream()
+                .filter(fee -> fee.getFeeType() == FeeType.SERVICE_FEE)
+                .forEach(fee -> {
+                    BigDecimal amount = getAmountFromFee(fee, requestedAmount);
+                    LoanFeeDto loanFeeDto = LoanFeeDto.builder()
+                            .feeType(fee.getFeeType())
+                            .amount(amount)
+                            .appliedDate(Instant.now())
+                            .build();
+                    loanFees.add(loanFeeDto);
+                });
         return loanFees;
     }
 
