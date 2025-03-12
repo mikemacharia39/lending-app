@@ -1,5 +1,10 @@
 package com.ezra.lending_app.domain.entities;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.ezra.lending_app.domain.enums.LoanState;
 import com.ezra.lending_app.domain.enums.LoanTerm;
 import jakarta.persistence.CascadeType;
@@ -13,14 +18,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.List;
+import lombok.experimental.SuperBuilder;
 
 import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generateReference;
 
@@ -28,7 +29,7 @@ import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generate
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
+@SuperBuilder(toBuilder = true)
 @Entity
 @Table(name = "customer_loan")
 public class Loan extends BaseEntity {
@@ -50,7 +51,7 @@ public class Loan extends BaseEntity {
     private BigDecimal disbursedAmount;
 
     @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LoanFee> loanFees;
+    private List<LoanFee> loanFees = new ArrayList<>();
 
     @Column(name = "full_loan_amount_plus_fees", nullable = false)
     private BigDecimal fullLoanAmountPlusFees;
@@ -76,10 +77,10 @@ public class Loan extends BaseEntity {
     private LoanState state = LoanState.PENDING_APPROVAL;
 
     @OneToMany(mappedBy = "loan", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
-    private List<LoanInstallment> installment;
+    private List<LoanInstallment> installment = new ArrayList<>();
 
     @OneToMany(mappedBy = "loan")
-    private List<LoanRepaymentReceipt> repayments;
+    private List<LoanRepaymentReceipt> repayments = new ArrayList<>();
 
     public void transitionState(LoanState newLoanState) {
         this.state = newLoanState;
