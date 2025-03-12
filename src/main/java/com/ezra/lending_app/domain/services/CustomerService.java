@@ -1,5 +1,7 @@
 package com.ezra.lending_app.domain.services;
 
+import java.util.Optional;
+
 import com.ezra.lending_app.api.dto.customer.CustomerRequestDto;
 import com.ezra.lending_app.api.dto.customer.CustomerResponseDto;
 import com.ezra.lending_app.domain.entities.Customer;
@@ -11,8 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Optional;
-
 @RequiredArgsConstructor
 @Transactional
 @Service
@@ -23,6 +23,8 @@ public class CustomerService {
     @Transactional
     public CustomerResponseDto createCustomer(final CustomerRequestDto customerRequestDto) {
         final Customer customer = customerMapper.toEntity(customerRequestDto);
+        customer.getAddresses().forEach(address -> address.setCustomer(customer));
+
         final Customer savedCustomer = customerRepository.save(customer);
         return customerMapper.toDto(savedCustomer);
     }
