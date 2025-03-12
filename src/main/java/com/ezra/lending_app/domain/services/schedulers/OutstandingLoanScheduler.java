@@ -16,10 +16,12 @@ import com.ezra.lending_app.domain.repositories.LoanRepository;
 import com.ezra.lending_app.domain.services.LoanNotificationService;
 import com.ezra.lending_app.domain.services.LoanService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class OutstandingLoanScheduler {
@@ -35,11 +37,13 @@ public class OutstandingLoanScheduler {
      * 5. If the due date is passed and the difference in days between the loan due date and the current date is between 0 and gracePeriodAfterLoanDueDateInDays then end notification informing user of loan overdue
      * 5.1. if past the gracePeriodAfterLoanDueDateInDays then change the loan state to OVERDUE and apply late fees
      */
-    @Scheduled(cron = "0 0 0 * * ?") // Run daily at midnight
+    @Scheduled(cron = "0 * * ? * *") // Run daily at midnight
     @Transactional(readOnly = true)
     public void processOutstandingLoans() {
+        log.info("Started outstanding loan scheduler...");
         List<Loan> loans = loanRepository.findAllByStateIn(List.of(LoanState.OVERDUE, LoanState.OPEN));
         loans.forEach(this::processLoan);
+        log.info("Completed processing outstanding loans");
     }
 
     private void processLoan(Loan loan) {
