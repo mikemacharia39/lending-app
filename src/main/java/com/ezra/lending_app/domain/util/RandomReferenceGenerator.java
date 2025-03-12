@@ -4,10 +4,9 @@ import org.apache.commons.text.RandomStringGenerator;
 
 public class RandomReferenceGenerator {
     public static String generateReference() {
-        final char[] allowedCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
         final int referenceLength = 10;
         final RandomStringGenerator generator = new RandomStringGenerator.Builder()
-                .withinRange(allowedCharacters)
+                .withinRange(new char[]{'0', '9'}, new char[]{'A', 'Z'})
                 .get();
         return generator.generate(referenceLength);
     }
