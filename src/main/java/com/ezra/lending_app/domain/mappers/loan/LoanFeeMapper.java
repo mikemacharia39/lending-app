@@ -10,6 +10,8 @@ public abstract class LoanFeeMapper {
     public abstract LoanFeeDto dto(LoanFee loanFee);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "dateCreated", ignore = true)
+    @Mapping(target = "dateModified", ignore = true)
     @Mapping(target = "loan", ignore = true)
     public abstract LoanFee entity(LoanFeeDto loanFeeDto);
 }
