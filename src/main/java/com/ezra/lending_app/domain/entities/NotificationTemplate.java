@@ -7,6 +7,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -20,6 +21,7 @@ import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generate
 @Entity
 @Table(name = "notification_template")
 public class NotificationTemplate extends BaseEntity {
+    @Builder.Default
     private final String code = generateReference();
 
     @Column(name = "template_name", nullable = false)
