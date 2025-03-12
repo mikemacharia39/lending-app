@@ -1,8 +1,10 @@
 package com.ezra.lending_app.domain.entities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.ezra.lending_app.domain.enums.DeviceOSType;
+import com.ezra.lending_app.domain.enums.IdentificationType;
 import com.ezra.lending_app.domain.enums.NotificationChannel;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -12,16 +14,16 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generateReference;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Builder
+@SuperBuilder(toBuilder = true)
 @Entity
 @Table(name = "customer")
 public class Customer extends BaseEntity {
@@ -38,8 +40,15 @@ public class Customer extends BaseEntity {
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "identification_type", nullable = false)
+    private IdentificationType identificationType;
+
+    @Column(name = "identification_number", nullable = false)
+    private String identificationNumber;
+
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CustomerAddress> addresses;
+    private List<CustomerAddress> addresses = new ArrayList<>();;
 
     @Column(name = "device_id")
     private String deviceId;
@@ -50,5 +59,5 @@ public class Customer extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "notification_channel")
-    private final NotificationChannel preferredNotificationChannel = NotificationChannel.SMS;
+    private NotificationChannel preferredNotificationChannel;
 }
