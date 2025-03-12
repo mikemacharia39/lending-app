@@ -19,6 +19,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -33,6 +34,7 @@ import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generate
 @Table(name = "product")
 public class Product extends BaseEntity {
 
+    @Builder.Default
     @Column(nullable = false, unique = true)
     private final String code = generateReference();
 
@@ -69,9 +71,11 @@ public class Product extends BaseEntity {
     @Column(name = "max_loan_term_type", nullable = false)
     private LoanTerm maxLoanTermType;
 
+    @Builder.Default
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductFee> fees = new ArrayList<>();
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProductStatus status = ProductStatus.INACTIVE;
@@ -98,9 +102,8 @@ public class Product extends BaseEntity {
         return this.status == ProductStatus.ACTIVE;
     }
 
-    @PrePersist
-    @PreUpdate
     public void prePersist() {
+        super.prePersist();
         if (this.status == null) {
             this.status = ProductStatus.INACTIVE;
         }
