@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.ezra.lending_app.domain.enums.LoanTerm;
+import com.ezra.lending_app.domain.enums.ProductLoanTenure;
 import com.ezra.lending_app.domain.enums.ProductStatus;
 import com.ezra.lending_app.domain.enums.RepaymentFrequencyType;
 import jakarta.validation.constraints.Min;
@@ -29,10 +30,15 @@ public class ProductRequestDto {
     @Size(min = 1, max = 1000)
     private String description;
     @NotNull
+    private ProductLoanTenure loanTenure;
+    @NotNull
     @NotBlank
     private String currency;
     @NotNull
     @Min(value = 1, message = "Minimum loan amount must be greater than 0")
+    private BigDecimal minLoanAmount;
+    @NotNull
+    @Min(value = 1, message = "Maximum loan amount must be greater than 0")
     private BigDecimal maxLoanAmount;
     @NotNull
     @Min(value = 1, message = "Minimum loan amount must be greater than 0")
@@ -45,8 +51,6 @@ public class ProductRequestDto {
     @NotNull
     private LoanTerm maxLoanTermType;
     private List<ProductFeeDto> fees;
-    @NotNull
-    private ProductStatus status;
     @NotNull
     private RepaymentFrequencyType repaymentFrequency;
     @NotNull
