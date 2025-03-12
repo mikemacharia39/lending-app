@@ -10,6 +10,7 @@ public abstract class CustomerAddressMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dateCreated", ignore = true)
     @Mapping(target = "dateModified", ignore = true)
+    @Mapping(target = "customer", ignore = true)
     abstract CustomerAddress toEntity(CustomerAddressDto customerAddressDto);
 
     abstract CustomerAddressDto toDto(CustomerAddress customerAddress);
