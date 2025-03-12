@@ -1,7 +1,7 @@
 package com.ezra.lending_app.domain.services;
 
+import java.time.Instant;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import com.ezra.lending_app.api.dto.notification.NotificationDto;
 import com.ezra.lending_app.domain.entities.Customer;
@@ -13,6 +13,7 @@ import com.ezra.lending_app.domain.enums.NotificationType;
 import com.ezra.lending_app.domain.repositories.NotificationTemplateRepository;
 import com.ezra.lending_app.domain.services.notification.INotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,11 +24,8 @@ public class LoanNotificationService {
     private final NotificationTemplateRepository notificationTemplateRepository;
     private final Map<NotificationChannel, INotificationService> notificationChannelServices;
 
-    @Transactional(readOnly = true)
-    public void sendLoanStateChangeNotification(final Loan loan) {
-        CompletableFuture.runAsync(() -> sendNotification(loan));
-    }
-
+    @Transactional
+    @Async
     public void sendLoanNotification(final Loan loan, final NotificationType notificationType) {
         NotificationTemplate template = notificationTemplateRepository.findByNotificationType(notificationType)
                 .orElseThrow(() -> new IllegalStateException("Notification template not found for type: " + notificationType));
@@ -39,6 +37,8 @@ public class LoanNotificationService {
                         .amount(loan.getRequestedAmount().toString())
                         .loanDueDate(loan.getDueDate().toString())
                         .loanReference(loan.getCode())
+                        .productName(loan.getProduct().getName())
+                        .paymentDate(Instant.now().toString())
                         .build())
                 .build();
 
@@ -49,7 +49,9 @@ public class LoanNotificationService {
         notifyCustomer(loan.getCustomer(), notification);
     }
 
-    private void sendNotification(final Loan loan) {
+    @Transactional(readOnly = true)
+    @Async
+    public void sendLoanStateChangeNotification(final Loan loan) {
         NotificationType notificationType = getNotificationTypeForLoanState(loan.getState());
         NotificationTemplate template = notificationTemplateRepository.findByNotificationType(notificationType)
                 .orElseThrow(() -> new IllegalStateException("Notification template not found for type: " + notificationType));
@@ -59,7 +61,9 @@ public class LoanNotificationService {
                 .recipientData(NotificationDto.RecipientData.builder()
                         .customerName(loan.getCustomer().getFirstName())
                         .amount(loan.getRequestedAmount().toString())
+                        .productName(loan.getProduct().getName())
                         .loanDueDate(loan.getDueDate().toString())
+                        .loanReference(loan.getCode())
                         .build())
                 .build();
 
