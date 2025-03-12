@@ -1,12 +1,19 @@
 package com.ezra.lending_app.api.dto.customer;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Builder
-public record CustomerAddressDto(
-        String addressLine,
-        String town,
-        String state,
-        String country
-) {
+public class CustomerAddressDto {
+    private String addressLine;
+    private String town;
+    private String state;
+    private String country;
 }
