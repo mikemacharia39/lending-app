@@ -11,6 +11,7 @@ public interface CustomerMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dateCreated", ignore = true)
     @Mapping(target = "dateModified", ignore = true)
+    @Mapping(target = "code", ignore = true)
     Customer toEntity(CustomerRequestDto dto);
 
     CustomerResponseDto toDto(Customer customer);
