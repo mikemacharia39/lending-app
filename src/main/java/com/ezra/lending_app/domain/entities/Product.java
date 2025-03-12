@@ -1,6 +1,7 @@
 package com.ezra.lending_app.domain.entities;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 
@@ -14,18 +15,20 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generateReference;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Builder
+@SuperBuilder(toBuilder = true)
 @Entity
 @Table(name = "product")
 public class Product extends BaseEntity {
@@ -67,7 +70,7 @@ public class Product extends BaseEntity {
     private LoanTerm maxLoanTermType;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductFee> fees;
+    private List<ProductFee> fees = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -93,5 +96,13 @@ public class Product extends BaseEntity {
 
     public boolean isActive() {
         return this.status == ProductStatus.ACTIVE;
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void prePersist() {
+        if (this.status == null) {
+            this.status = ProductStatus.INACTIVE;
+        }
     }
 }
