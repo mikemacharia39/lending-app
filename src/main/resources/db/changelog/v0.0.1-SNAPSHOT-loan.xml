@@ -164,4 +164,13 @@
                                  referencedTableName="customer_loan"
                                  referencedColumnNames="id"/>
     </changeSet>
+
+    <changeSet id="v0.0.1-SNAPSHOT-loan_channel_repayment-index" author="mikemacharia39">
+        <createIndex tableName="loan_repayment" indexName="idx_loan_repayment_payment_channel">
+            <column name="payment_channel"/>
+        </createIndex>
+        <createIndex tableName="loan_repayment" indexName="idx_loan_repayment_payment_reference">
+            <column name="payment_reference"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
