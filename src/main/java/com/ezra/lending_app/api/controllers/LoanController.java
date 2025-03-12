@@ -24,16 +24,21 @@ public class LoanController {
 
     public final LoanService loanService;
 
-    @GetMapping("/products/{productCode}/customer/{customerCode}")
+    @GetMapping("/products/{productCode}/customers/{customerCode}")
     public LoanResponseDto checkLoanEligibility(@PathVariable String productCode, @PathVariable String customerCode) {
         return loanService.checkLoanEligibility(productCode, customerCode);
     }
 
-    @PostMapping("/products/{productCode}/customer/{customerCode}")
+    @PostMapping("/products/{productCode}/customers/{customerCode}")
     public LoanResponseDto applyForLoan(@PathVariable String productCode,
                                         @PathVariable String customerCode,
                                         @Valid @RequestBody LoanRequestDto loanRequestDto) {
         return loanService.applyForLoan(productCode, customerCode, loanRequestDto);
+    }
+
+    @GetMapping("/{loanCode}")
+    public LoanResponseDto getLoanDetails(@PathVariable String loanCode) {
+        return loanService.getLoanDetails(loanCode);
     }
 
     @PutMapping("/{loanCode}/workflow")
