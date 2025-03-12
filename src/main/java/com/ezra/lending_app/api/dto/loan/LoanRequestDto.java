@@ -10,8 +10,6 @@ import java.math.BigDecimal;
 
 @Builder
 public record LoanRequestDto(
-        Long customerId,
-        Long productId,
         @NotNull
         @Min(value = 1, message = "The loan amount must be greater than or equal to 1")
         BigDecimal requestedAmount,
