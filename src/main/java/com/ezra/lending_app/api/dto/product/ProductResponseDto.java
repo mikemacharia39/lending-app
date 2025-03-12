@@ -32,6 +32,7 @@ public class ProductResponseDto {
     private ProductStatus status;
     private RepaymentFrequencyType repaymentFrequency;
     private int gracePeriodAfterLoanDueDateInDays;
+    private int gracePeriodBeforeLoanDueDateInDays;
     private Instant dateCreated;
     private Instant dateModified;
 }
