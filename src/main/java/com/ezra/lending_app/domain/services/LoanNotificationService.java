@@ -1,5 +1,6 @@
 package com.ezra.lending_app.domain.services;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 
@@ -24,25 +25,12 @@ public class LoanNotificationService {
     private final NotificationTemplateRepository notificationTemplateRepository;
     private final Map<NotificationChannel, INotificationService> notificationChannelServices;
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Async
     public void sendLoanNotification(final Loan loan, final NotificationType notificationType) {
-        NotificationTemplate template = notificationTemplateRepository.findByNotificationType(notificationType)
-                .orElseThrow(() -> new IllegalStateException("Notification template not found for type: " + notificationType));
+        NotificationDto notification = getNotificationDto(loan, notificationType);
 
-        NotificationDto notification = NotificationDto.builder()
-                .template(template.getMessageTemplate())
-                .recipientData(NotificationDto.RecipientData.builder()
-                        .customerName(loan.getCustomer().getFirstName())
-                        .amount(loan.getRequestedAmount().toString())
-                        .loanDueDate(loan.getDueDate().toString())
-                        .loanReference(loan.getCode())
-                        .productName(loan.getProduct().getName())
-                        .paymentDate(Instant.now().toString())
-                        .build())
-                .build();
-
-        String message = formulateMessage(template.getMessageTemplate(), notification, notificationType);
+        String message = formulateMessage(notification.getTemplate(), notification, notificationType);
         notification.setMessage(message);
         notification.setRecipient(getNotificationMedia(loan.getCustomer()));
 
@@ -53,25 +41,33 @@ public class LoanNotificationService {
     @Async
     public void sendLoanStateChangeNotification(final Loan loan) {
         NotificationType notificationType = getNotificationTypeForLoanState(loan.getState());
-        NotificationTemplate template = notificationTemplateRepository.findByNotificationType(notificationType)
-                .orElseThrow(() -> new IllegalStateException("Notification template not found for type: " + notificationType));
 
-        NotificationDto notification = NotificationDto.builder()
-                .template(template.getMessageTemplate())
-                .recipientData(NotificationDto.RecipientData.builder()
-                        .customerName(loan.getCustomer().getFirstName())
-                        .amount(loan.getRequestedAmount().toString())
-                        .productName(loan.getProduct().getName())
-                        .loanDueDate(loan.getDueDate().toString())
-                        .loanReference(loan.getCode())
-                        .build())
-                .build();
+        NotificationDto notification = getNotificationDto(loan, notificationType);
 
-        String message = formulateMessage(template.getMessageTemplate(), notification, notificationType);
+        String message = formulateMessage(notification.getTemplate(), notification, notificationType);
         notification.setMessage(message);
         notification.setRecipient(getNotificationMedia(loan.getCustomer()));
 
         notifyCustomer(loan.getCustomer(), notification);
+    }
+
+    private NotificationDto getNotificationDto(Loan loan, NotificationType notificationType) {
+        NotificationTemplate template = notificationTemplateRepository.findByNotificationType(notificationType)
+                .orElseThrow(() -> new IllegalStateException("Notification template not found for type: " + notificationType));
+
+        return NotificationDto.builder()
+                .template(template.getMessageTemplate())
+                .recipientData(NotificationDto.RecipientData.builder()
+                        .customerName(loan.getCustomer().getFirstName())
+                        .amount(loan.getRequestedAmount().toString())
+                        .loanDueDate(loan.getDueDate().toString())
+                        .loanReference(loan.getCode())
+                        .productName(loan.getProduct().getName())
+                        .paymentDate(Instant.now().toString())
+                        .daysOverdue(String.valueOf(Duration.between(loan.getDueDate(), Instant.now()).toDays()))
+                        .daysUntilDue(String.valueOf(Duration.between(Instant.now(), loan.getDueDate()).toDays()))
+                        .build())
+                .build();
     }
 
     private void notifyCustomer(Customer customer, NotificationDto notification) {
@@ -98,7 +94,7 @@ public class LoanNotificationService {
 
     private String formulateMessage(String template, NotificationDto notificationDto, NotificationType notificationType) {
         String message = template.replace("{{customerName}}", notificationDto.getRecipientData().getCustomerName())
-                .replace("{{amount}}", notificationDto.getRecipientData().getAmount())
+                .replace("{{amount}}", String.format("%s %s", notificationDto.getRecipientData().getCurrency(), notificationDto.getRecipientData().getAmount()))
                 .replace("{{loanReference}}", notificationDto.getRecipientData().getLoanReference())
                 .replace("{{loanDueDate}}", notificationDto.getRecipientData().getLoanDueDate());
 
