@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.List;
 
 import com.ezra.lending_app.domain.enums.LoanTerm;
+import com.ezra.lending_app.domain.enums.ProductLoanTenure;
 import com.ezra.lending_app.domain.enums.ProductStatus;
 import com.ezra.lending_app.domain.enums.RepaymentFrequencyType;
 import lombok.AllArgsConstructor;
@@ -19,8 +20,8 @@ import lombok.Setter;
 public class ProductResponseDto {
     private String code;
     private String name;
+    private ProductLoanTenure loanTenure;
     private String description;
-    private BigDecimal interestRate;
     private String currency;
     private BigDecimal maxLoanAmount;
     private int minLoanTermDuration;
