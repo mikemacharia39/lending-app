@@ -19,9 +19,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class CustomerService {
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
+    private final ValidationService validationService;
 
     @Transactional
     public CustomerResponseDto createCustomer(final CustomerRequestDto customerRequestDto) {
+        validationService.validateCustomerRequest(customerRequestDto);
+
         final Customer customer = customerMapper.toEntity(customerRequestDto);
         customer.getAddresses().forEach(address -> address.setCustomer(customer));
 
