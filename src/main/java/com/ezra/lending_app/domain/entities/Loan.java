@@ -52,6 +52,7 @@ public class Loan extends BaseEntity {
     @Column(name = "disbursed_amount", nullable = false)
     private BigDecimal disbursedAmount;
 
+    @Builder.Default
     @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LoanFee> loanFees = new ArrayList<>();
 
