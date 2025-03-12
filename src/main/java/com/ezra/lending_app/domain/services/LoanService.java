@@ -163,9 +163,13 @@ public class LoanService {
     }
 
     public LoanResponseDto getLoanDetails(final String loanCode) {
-        Loan loan = loanRepository.findByCode(loanCode)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found"));
+        Loan loan = getLoanEntity(loanCode);
         return loanMapper.dto(loan);
+    }
+
+    public Loan getLoanEntity(final String loanCode) {
+        return loanRepository.findByCode(loanCode)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found"));
     }
 
     public LoanResponseDto loanWorkflow(final String loanCode, final LoanState newLoanState) {
