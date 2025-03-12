@@ -11,6 +11,8 @@ public abstract class ProductMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dateCreated", ignore = true)
     @Mapping(target = "dateModified", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "code", ignore = true)
     public abstract Product toEntity(ProductRequestDto requestDto);
 
     public abstract ProductResponseDto toDto(Product entity);
