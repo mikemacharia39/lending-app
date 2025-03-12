@@ -17,6 +17,12 @@
             <column name="last_name" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
+            <column name="identification_type" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="identification_number" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
             <column name="email" type="VARCHAR(100)"/>
             <column name="phone_number" type="VARCHAR(20)">
                 <constraints nullable="false"/>
@@ -33,6 +39,22 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+    </changeSet>
+    <changeSet id="v0.0.1-SNAPSHOT-phone-number-index" author="mikemacharia39">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="customer" columnName="phone_number"/>
+        </preConditions>
+        <createIndex indexName="idx_customer_phone_number" tableName="customer">
+            <column name="phone_number"/>
+        </createIndex>
+    </changeSet>
+    <changeSet id="v0.0.1-SNAPSHOT-identification-number-index" author="mikemacharia39">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="customer" columnName="identification_number"/>
+        </preConditions>
+        <createIndex indexName="idx_customer_identification_number" tableName="customer">
+            <column name="identification_number"/>
+        </createIndex>
     </changeSet>
 
     <changeSet id="v0.0.1-SNAPSHOT-customer_address" author="mikemacharia39">
