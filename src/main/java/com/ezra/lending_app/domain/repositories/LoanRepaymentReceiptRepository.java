@@ -12,4 +12,9 @@ public interface LoanRepaymentReceiptRepository extends JpaRepository<LoanRepaym
 
     @Query("SELECT lrr FROM LoanRepaymentReceipt lrr WHERE lrr.loan.id = :loanId")
     List<LoanRepaymentReceipt> findAllByLoanId(Long loanId);
+
+    @Query("SELECT lrr FROM LoanRepaymentReceipt lrr WHERE lrr.loan.code = :loanCode")
+    List<LoanRepaymentReceipt> findAllByLoanCode(String loanCode);
+
+    List<LoanRepaymentReceipt> findAllByPaymentReferenceAndPaymentChannel(String paymentReference, String paymentChannel);
 }
