@@ -23,6 +23,7 @@ public class ProductService {
     @Transactional
     public ProductResponseDto createProduct(final ProductRequestDto productRequestDto) {
         final Product product = productMapper.toEntity(productRequestDto);
+        product.getFees().forEach(fee -> fee.setProduct(product));
         final Product savedProduct = productRepository.save(product);
         return productMapper.toDto(savedProduct);
     }
@@ -49,7 +50,7 @@ public class ProductService {
     }
 
     public Product getProductEntity(final String productCode) {
-        final Optional<Product> productOpt = productRepository.findByProductCode(productCode);
+        final Optional<Product> productOpt = productRepository.findByCode(productCode);
         if (productOpt.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("The product with code %s was not found", productCode));
         }
