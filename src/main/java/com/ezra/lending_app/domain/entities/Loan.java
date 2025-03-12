@@ -18,6 +18,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,6 +34,7 @@ import static com.ezra.lending_app.domain.util.RandomReferenceGenerator.generate
 @Entity
 @Table(name = "customer_loan")
 public class Loan extends BaseEntity {
+    @Builder.Default
     @Column(nullable = false, unique = true)
     private final String code = generateReference();
 
@@ -72,13 +74,16 @@ public class Loan extends BaseEntity {
     @Column(name = "due_date", nullable = false)
     private Instant dueDate;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LoanState state = LoanState.PENDING_APPROVAL;
 
+    @Builder.Default
     @OneToMany(mappedBy = "loan", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     private List<LoanInstallment> installment = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "loan")
     private List<LoanRepaymentReceipt> repayments = new ArrayList<>();
 
