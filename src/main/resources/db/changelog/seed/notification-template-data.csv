@@ -6,3 +6,4 @@ id;code;template_name;notification_type;message_template;date_created;date_modif
 5;NT005;Loan Before Due;LOAN_BEFORE_DUE;Dear {{customerName}}, this is a reminder that your loan payment of {{amount}} is due in {{daysUntilDue}} days. Please make the payment on time to avoid late fees.;2025-03-10 13:05:00;2025-03-10 13:05:00
 6;NT006;Loan Rejected;LOAN_REJECTED;Dear {{customerName}}, your loan application {{loanReference}} worth {{amount}} has been rejected. Please contact us for more information.;2025-03-10 13:05:00;2025-03-10 13:05:00
 7;NT007;Loan Completed;LOAN_COMPLETED;Dear {{customerName}}, your loan {{loanReference}} has been fully repaid. Thank you for your business.;2025-03-10 13:05:00;2025-03-10 13:05:00
+8;NT008;Loan pending approval;LOAN_PENDING_APPROVAL;Dear {{customerName}}, your {{productName}} loan of {{amount}} is being reviewed.;2025-03-10 13:05:00;2025-03-10 13:05:00
