@@ -40,6 +40,7 @@ public class ProductFee extends BaseEntity {
     @Column(name = "value_type", nullable = false)
     private LoanFeeValueType valueType;
 
+    @Column(name = "fee_value", nullable = false)
     private BigDecimal value;
 
     @Column(name = "applied_at_origination", nullable = false)
