@@ -23,6 +23,7 @@ public class ProductResponseDto {
     private ProductLoanTenure loanTenure;
     private String description;
     private String currency;
+    private BigDecimal minLoanAmount;
     private BigDecimal maxLoanAmount;
     private int minLoanTermDuration;
     private LoanTerm minLoanTermType;
