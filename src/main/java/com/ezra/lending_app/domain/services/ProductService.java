@@ -24,6 +24,7 @@ public class ProductService {
     public ProductResponseDto createProduct(final ProductRequestDto productRequestDto) {
         final Product product = productMapper.toEntity(productRequestDto);
         product.getFees().forEach(fee -> fee.setProduct(product));
+
         final Product savedProduct = productRepository.save(product);
         return productMapper.toDto(savedProduct);
     }
