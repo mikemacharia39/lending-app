@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class SmsNotificationService implements INotificationService {
     @Override
     public void sendNotification(NotificationDto notification) {
-        log.info("Sending SMS notification...");
-        log.info("Sending message {} to recipient {}", notification.getMessage(), notification.getRecipient());
+        log.info("Sending sms notification to recipient {}", notification.getRecipient());
+        log.info("The message is {}", notification.getMessage());
     }
 }
