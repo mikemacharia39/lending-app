@@ -65,14 +65,14 @@ public class OutstandingLoanScheduler {
         if (daysUntilDueDate >= 0 && daysUntilDueDate <= loan.getProduct().getGracePeriodBeforeLoanDueDateInDays()) {
             loanNotificationService.sendLoanNotification(loan, NotificationType.LOAN_BEFORE_DUE);
         } else if (daysUntilDueDate == 0) {
-            loanNotificationService.sendLoanNotification(loan, NotificationType.LOAN_DUE);
+            loanNotificationService.sendLoanNotification(loan, NotificationType.LOAN_DUE, assessLateFee(loan));
         } else if (daysPastDueDate >= 0 && daysPastDueDate <= loan.getProduct().getGracePeriodAfterLoanDueDateInDays()) {
-            loanNotificationService.sendLoanNotification(loan, NotificationType.PAST_DUE);
+            loanNotificationService.sendLoanNotification(loan, NotificationType.PAST_DUE, assessLateFee(loan));
         } else if (daysPastDueDate > loan.getProduct().getGracePeriodAfterLoanDueDateInDays()) {
             loan.transitionState(LoanState.OVERDUE);
             applyLateFees(loan);
             loanRepository.save(loan);
-            loanNotificationService.sendLoanNotification(loan, NotificationType.PAST_DUE);
+            loanNotificationService.sendLoanNotification(loan, NotificationType.PAST_DUE, assessLateFee(loan));
         }
     }
 
@@ -105,5 +105,17 @@ public class OutstandingLoanScheduler {
             loan.getLoanFees().add(lateFee);
             loan.setFullLoanAmountPlusFees(loan.getFullLoanAmountPlusFees().add(lateFeeAmount));
         }
+    }
+
+    private BigDecimal assessLateFee(final Loan loan) {
+        Product product = loan.getProduct();
+        ProductFee lateRunningFee = product.getFees().stream()
+                .filter(productFee -> productFee.getFeeType() == FeeType.LATE_FEE)
+                .findFirst()
+                .orElse(null);
+        if (lateRunningFee != null) {
+            return loanService.getAmountFromFee(lateRunningFee, loan.getRequestedAmount());
+        }
+        return BigDecimal.ZERO;
     }
 }
