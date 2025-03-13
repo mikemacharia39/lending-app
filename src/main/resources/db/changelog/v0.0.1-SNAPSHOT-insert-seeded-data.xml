@@ -23,7 +23,7 @@
                         relativeToChangelogFile="true"/>
     </changeSet>
 
-    <changeSet id="v0.0.1-SNAPSHOT-seed-product-data" author="mikemacharia39">
+    <changeSet id="v0.0.1-SNAPSHOT-seed-product-data" author="mikemacharia39" runOnChange="true">
         <loadUpdateData primaryKey="id"
                         file="seed/product-data.csv"
                         separator=";"
@@ -35,7 +35,7 @@
                         tableName="fee"
                         relativeToChangelogFile="true"/>
     </changeSet>
-    <changeSet id="v0.0.1-SNAPSHOT-seed-loan-data" author="mikemacharia39">
+    <changeSet id="v0.0.1-SNAPSHOT-seed-loan-data" author="mikemacharia39" runOnChange="true">
         <loadUpdateData primaryKey="id"
                         file="seed/loan-data.csv"
                         separator=";"
