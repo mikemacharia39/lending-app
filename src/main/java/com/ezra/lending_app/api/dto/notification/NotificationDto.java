@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Builder
 @Setter
@@ -27,12 +29,12 @@ public class NotificationDto {
     public static class RecipientData {
         private String customerName;
         private String currency;
-        private String amount;
+        private BigDecimal amount;
         private String paymentDate;
         private String productName;
         private String loanDueDate;
         private String daysOverdue;
-        private String lateFeeAmount;
+        private BigDecimal lateFeeAmount;
         private String daysUntilDue;
         private String loanReference;
     }
