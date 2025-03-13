@@ -10,4 +10,46 @@
                         separator=";"
                         tableName="notification_template" relativeToChangelogFile="true"/>
     </changeSet>
+
+    <changeSet id="v0.0.1-SNAPSHOT-seed-customer-data" author="mikemacharia39" runOnChange="true">
+        <loadUpdateData primaryKey="id"
+                        file="seed/customer-data.csv"
+                        separator=";"
+                        tableName="customer" relativeToChangelogFile="true"/>
+        <loadUpdateData primaryKey="id"
+                        file="seed/customer-address-data.csv"
+                        separator=";"
+                        tableName="customer_address"
+                        relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="v0.0.1-SNAPSHOT-seed-product-data" author="mikemacharia39">
+        <loadUpdateData primaryKey="id"
+                        file="seed/product-data.csv"
+                        separator=";"
+                        tableName="product"
+                        relativeToChangelogFile="true"/>
+        <loadUpdateData primaryKey="id"
+                        file="seed/product-fee-data.csv"
+                        separator=";"
+                        tableName="fee"
+                        relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="v0.0.1-SNAPSHOT-seed-loan-data" author="mikemacharia39">
+        <loadUpdateData primaryKey="id"
+                        file="seed/loan-data.csv"
+                        separator=";"
+                        tableName="customer_loan"
+                        relativeToChangelogFile="true"/>
+        <loadUpdateData primaryKey="id"
+                        file="seed/loan-fee-data.csv"
+                        separator=";"
+                        tableName="loan_fee"
+                        relativeToChangelogFile="true"/>
+        <loadUpdateData primaryKey="id"
+                        file="seed/loan-installment-data.csv"
+                        separator=";"
+                        tableName="loan_installment"
+                        relativeToChangelogFile="true"/>
+    </changeSet>
 </databaseChangeLog>
