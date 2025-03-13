@@ -1,0 +1,2 @@
+id;code;name;description;currency;loan_tenure;min_loan_amount;max_loan_amount;min_loan_term_duration;min_loan_term_type;max_loan_term_duration;max_loan_term_type;status;repayment_frequency;grace_period_after_loan_due_date_in_days;grace_period_before_loan_due_date_in_days;date_created;date_modified
+2;PROD002;Personal Improvement Loan;A loan for personal use;KES;FLEXIBLE_TENURE;1000.00;50000.00;7;DAY;30;DAY;ACTIVE;ONE_OFF;4;4;2025-03-13 13:05:00;2025-03-13 13:05:00
