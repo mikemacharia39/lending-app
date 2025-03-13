@@ -1,0 +1,2 @@
+id;code;first_name;last_name;identification_type;identification_number;email;phone_number;device_id;device_type;notification_channel;date_created;date_modified
+4;CUST004;Jane;Doe;NATIONAL_ID;291236789;jane.doe@example.com;25471236789;device123;ANDROID;SMS;2025-03-13 13:05:00;2025-03-13 13:05:00
