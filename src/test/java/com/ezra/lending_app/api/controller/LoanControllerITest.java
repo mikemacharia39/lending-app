@@ -42,6 +42,15 @@ public class LoanControllerITest extends BaseITest {
     }
 
     @Test
+    void checkLoanEligibilityThrowsErrorWhenProductIsInActiveTest() throws Exception {
+        CustomerResponseDto customer = CustomerControllerITest.createCustomerUtil(mockMvc, objectMapper);
+        ProductResponseDto product = ProductControllerITest.createProductUtil(mockMvc, objectMapper);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/loans/products/" + product.getCode() + "/customers/" + customer.getCode()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void applyForLoanTest() throws Exception {
         LoanRequestDto loanRequestDto = LoanRequestDto.builder()
                 .requestedAmount(BigDecimal.valueOf(1000.00))
