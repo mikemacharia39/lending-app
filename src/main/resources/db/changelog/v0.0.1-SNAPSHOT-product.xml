@@ -98,4 +98,14 @@
                                  referencedTableName="product"
                                  referencedColumnNames="id"/>
     </changeSet>
+    <!-- rename column value in table fee to fee_value. In H2 value is a keyword-->
+    <changeSet id="v0.0.1-SNAPSHOT-product-fee-value-3" author="mikemacharia39">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName ="fee" columnName="value"/>
+        </preConditions>
+        <renameColumn tableName="fee"
+                      oldColumnName="value"
+                      newColumnName="fee_value"
+                      columnDataType="DECIMAL(19, 2)"/>
+    </changeSet>
 </databaseChangeLog>
