@@ -1,5 +1,6 @@
 package com.ezra.lending_app.domain.services;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
@@ -28,7 +29,20 @@ public class LoanNotificationService {
     @Transactional(readOnly = true)
     @Async
     public void sendLoanNotification(final Loan loan, final NotificationType notificationType) {
-        NotificationDto notification = getNotificationDto(loan, notificationType);
+        NotificationDto notification = getNotificationDto(loan, notificationType, null);
+
+        String message = formulateMessage(notification.getTemplate(), notification, notificationType);
+        notification.setMessage(message);
+        notification.setRecipient(getNotificationMedia(loan.getCustomer()));
+
+        notifyCustomer(loan.getCustomer(), notification);
+    }
+
+    public void sendLoanNotification(final Loan loan,
+                                     final NotificationType notificationType,
+                                     final BigDecimal lateFee) {
+
+        NotificationDto notification = getNotificationDto(loan, notificationType, lateFee);
 
         String message = formulateMessage(notification.getTemplate(), notification, notificationType);
         notification.setMessage(message);
@@ -42,7 +56,7 @@ public class LoanNotificationService {
     public void sendLoanStateChangeNotification(final Loan loan) {
         NotificationType notificationType = getNotificationTypeForLoanState(loan.getState());
 
-        NotificationDto notification = getNotificationDto(loan, notificationType);
+        NotificationDto notification = getNotificationDto(loan, notificationType, null);
 
         String message = formulateMessage(notification.getTemplate(), notification, notificationType);
         notification.setMessage(message);
@@ -51,19 +65,27 @@ public class LoanNotificationService {
         notifyCustomer(loan.getCustomer(), notification);
     }
 
-    private NotificationDto getNotificationDto(Loan loan, NotificationType notificationType) {
+    private NotificationDto getNotificationDto(final Loan loan,
+                                               final NotificationType notificationType,
+                                               BigDecimal lateFee) {
         NotificationTemplate template = notificationTemplateRepository.findByNotificationType(notificationType)
                 .orElseThrow(() -> new IllegalStateException("Notification template not found for type: " + notificationType));
+
+        if (lateFee == null) {
+            lateFee = BigDecimal.ZERO;
+        }
 
         return NotificationDto.builder()
                 .template(template.getMessageTemplate())
                 .recipientData(NotificationDto.RecipientData.builder()
                         .customerName(loan.getCustomer().getFirstName())
-                        .amount(loan.getRequestedAmount().toString())
+                        .currency(String.valueOf(loan.getProduct().getCurrency()))
+                        .amount(loan.getRequestedAmount())
                         .loanDueDate(loan.getDueDate().toString())
                         .loanReference(loan.getCode())
                         .productName(loan.getProduct().getName())
                         .paymentDate(Instant.now().toString())
+                        .lateFeeAmount(lateFee)
                         .daysOverdue(String.valueOf(Duration.between(loan.getDueDate(), Instant.now()).toDays()))
                         .daysUntilDue(String.valueOf(Duration.between(Instant.now(), loan.getDueDate()).toDays()))
                         .build())
@@ -109,7 +131,7 @@ public class LoanNotificationService {
                 message = message.replace("{{daysOverdue}}", notificationDto.getRecipientData().getDaysOverdue());
                 break;
             case LOAN_DUE:
-                message = message.replace("{{lateFeeAmount}}", notificationDto.getRecipientData().getLateFeeAmount());
+                message = message.replace("{{lateFeeAmount}}", String.format("%s %s", notificationDto.getRecipientData().getCurrency(), notificationDto.getRecipientData().getLateFeeAmount()));
                 break;
             case LOAN_BEFORE_DUE:
                 message = message.replace("{{daysUntilDue}}", notificationDto.getRecipientData().getDaysUntilDue());
