@@ -36,8 +36,12 @@ public class OutstandingLoanScheduler {
      * 4. If the due date is reached, the send a specific notification informing user to pay before the date as passed
      * 5. If the due date is passed and the difference in days between the loan due date and the current date is between 0 and gracePeriodAfterLoanDueDateInDays then end notification informing user of loan overdue
      * 5.1. if past the gracePeriodAfterLoanDueDateInDays then change the loan state to OVERDUE and apply late fees
+     * <p>
+     * [0 0 6 * * ?] run every day at 6 am
+     * [0 * * ? * *] run every minute - for demo
+     *
      */
-    @Scheduled(cron = "0 * * ? * *") // Run daily at midnight
+    @Scheduled(cron = "0 * * ? * *")
     @Transactional(readOnly = true)
     public void processOutstandingLoans() {
         log.info("Started outstanding loan scheduler...");
@@ -75,11 +79,17 @@ public class OutstandingLoanScheduler {
     /**
      * If Loan Product has fee of type late running fee, then add it to the loan
      * Apply late fees to the loan
+     * Apply late fee only ones
      *
      * @param loan loan Entity
      */
     private void applyLateFees(Loan loan) {
         Product product = loan.getProduct();
+
+        if (loan.getLoanFees().stream().anyMatch(loanFee -> loanFee.getFeeType() == FeeType.LATE_FEE)) {
+            return;
+        }
+
         ProductFee lateRunningFee = product.getFees().stream()
                 .filter(productFee -> productFee.getFeeType() == FeeType.LATE_FEE)
                 .findFirst()
