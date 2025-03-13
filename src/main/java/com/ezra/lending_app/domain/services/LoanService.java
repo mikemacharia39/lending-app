@@ -315,7 +315,7 @@ public class LoanService {
      * @param requestedAmount Requested loan amount
      * @return the evaluated loan amount from the product fees
      */
-    public List<LoanFeeDto> calculateLoanFees(List<ProductFee> productFees, BigDecimal requestedAmount) {
+    private List<LoanFeeDto> calculateLoanFees(List<ProductFee> productFees, BigDecimal requestedAmount) {
         List<LoanFeeDto> loanFees = new ArrayList<>();
 
         productFees.stream()
@@ -330,6 +330,39 @@ public class LoanService {
                     loanFees.add(loanFeeDto);
                 });
         return loanFees;
+    }
+
+    /**
+     * If Loan Product has fee of type late running fee, then add it to the loan
+     * Apply late fees to the loan
+     * Apply late fee only ones
+     *
+     * @param loan loan Entity
+     */
+    @Transactional
+    public void applyLateFees(Loan loan) {
+        final Product product = loan.getProduct();
+
+        if (loan.getLoanFees().stream().anyMatch(loanFee -> loanFee.getFeeType() == FeeType.LATE_FEE)) {
+            return;
+        }
+
+        final ProductFee lateRunningFee = product.getFees().stream()
+                .filter(productFee -> productFee.getFeeType() == FeeType.LATE_FEE)
+                .findFirst()
+                .orElse(null);
+        if (lateRunningFee != null) {
+            BigDecimal lateFeeAmount = getAmountFromFee(lateRunningFee, loan.getRequestedAmount());
+            LoanFee lateFee = LoanFee.builder()
+                    .feeType(FeeType.LATE_FEE)
+                    .amount(lateFeeAmount)
+                    .appliedDate(Instant.now())
+                    .loan(loan)
+                    .build();
+            loan.getLoanFees().add(lateFee);
+            loan.setFullLoanAmountPlusFees(loan.getFullLoanAmountPlusFees().add(lateFeeAmount));
+            loanRepository.save(loan);
+        }
     }
 
     public BigDecimal getAmountFromFee(final ProductFee productFee, final BigDecimal requestedAmount) {

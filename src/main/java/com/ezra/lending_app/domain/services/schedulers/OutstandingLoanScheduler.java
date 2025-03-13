@@ -6,7 +6,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import com.ezra.lending_app.domain.entities.Loan;
-import com.ezra.lending_app.domain.entities.LoanFee;
 import com.ezra.lending_app.domain.entities.Product;
 import com.ezra.lending_app.domain.entities.ProductFee;
 import com.ezra.lending_app.domain.enums.FeeType;
@@ -21,6 +20,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -42,7 +42,7 @@ public class OutstandingLoanScheduler {
      *
      */
     @Scheduled(cron = "0 * * ? * *")
-    @Transactional(readOnly = true)
+    @Transactional
     public void processOutstandingLoans() {
         log.info("Started outstanding loan scheduler...");
         List<Loan> loans = loanRepository.findAllByStateIn(List.of(LoanState.OVERDUE, LoanState.OPEN));
@@ -51,6 +51,7 @@ public class OutstandingLoanScheduler {
     }
 
     private void processLoan(Loan loan) {
+        log.info("Processing loan with code {}", loan.getCode());
         Instant now = Instant.now();
         long daysUntilDueDate = ChronoUnit.DAYS.between(now, loan.getDueDate());
         long daysPastDueDate = ChronoUnit.DAYS.between(loan.getDueDate(), now);
@@ -70,40 +71,8 @@ public class OutstandingLoanScheduler {
             loanNotificationService.sendLoanNotification(loan, NotificationType.PAST_DUE, assessLateFee(loan));
         } else if (daysPastDueDate > loan.getProduct().getGracePeriodAfterLoanDueDateInDays()) {
             loan.transitionState(LoanState.OVERDUE);
-            applyLateFees(loan);
-            loanRepository.save(loan);
+            loanService.applyLateFees(loan);
             loanNotificationService.sendLoanNotification(loan, NotificationType.PAST_DUE, assessLateFee(loan));
-        }
-    }
-
-    /**
-     * If Loan Product has fee of type late running fee, then add it to the loan
-     * Apply late fees to the loan
-     * Apply late fee only ones
-     *
-     * @param loan loan Entity
-     */
-    private void applyLateFees(Loan loan) {
-        Product product = loan.getProduct();
-
-        if (loan.getLoanFees().stream().anyMatch(loanFee -> loanFee.getFeeType() == FeeType.LATE_FEE)) {
-            return;
-        }
-
-        ProductFee lateRunningFee = product.getFees().stream()
-                .filter(productFee -> productFee.getFeeType() == FeeType.LATE_FEE)
-                .findFirst()
-                .orElse(null);
-        if (lateRunningFee != null) {
-            BigDecimal lateFeeAmount = loanService.getAmountFromFee(lateRunningFee, loan.getRequestedAmount());
-            LoanFee lateFee = LoanFee.builder()
-                    .feeType(FeeType.LATE_FEE)
-                    .amount(lateFeeAmount)
-                    .appliedDate(Instant.now())
-                    .loan(loan)
-                    .build();
-            loan.getLoanFees().add(lateFee);
-            loan.setFullLoanAmountPlusFees(loan.getFullLoanAmountPlusFees().add(lateFeeAmount));
         }
     }
 

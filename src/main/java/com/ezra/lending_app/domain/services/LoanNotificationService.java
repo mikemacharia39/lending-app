@@ -80,7 +80,7 @@ public class LoanNotificationService {
                 .recipientData(NotificationDto.RecipientData.builder()
                         .customerName(loan.getCustomer().getFirstName())
                         .currency(String.valueOf(loan.getProduct().getCurrency()))
-                        .amount(loan.getRequestedAmount())
+                        .amount(loan.getFullLoanAmountPlusFees())
                         .loanDueDate(loan.getDueDate().toString())
                         .loanReference(loan.getCode())
                         .productName(loan.getProduct().getName())
