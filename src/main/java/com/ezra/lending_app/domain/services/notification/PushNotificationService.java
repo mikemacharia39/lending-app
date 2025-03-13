@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class PushNotificationService implements INotificationService {
     @Override
     public void sendNotification(NotificationDto notification) {
-        log.info("Sending push notification message: {} to recipient: {}",
-                notification.getMessage(), notification.getRecipient());
+        log.info("Sending push notification to recipient {}", notification.getRecipient());
+        log.info("The message is {}", notification.getMessage());
     }
 }
