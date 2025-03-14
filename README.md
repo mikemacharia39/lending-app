@@ -62,3 +62,9 @@ After building the application, you can run the application from the main class 
 
 You can alternatively run `./gradlew bootRun` from the terminal.
 
+### Documentation
+http://localhost:5002/swagger-ui/index.html
+
+### Actuator
+http://localhost:5002/actuator/health
+
