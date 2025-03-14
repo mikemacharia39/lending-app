@@ -4,7 +4,6 @@ import com.ezra.lending_app.api.dto.customer.CustomerRequestDto;
 import com.ezra.lending_app.domain.entities.Product;
 import com.ezra.lending_app.domain.enums.LoanState;
 import com.ezra.lending_app.domain.enums.NotificationChannel;
-import com.ezra.lending_app.domain.enums.ProductStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
