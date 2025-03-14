@@ -44,7 +44,7 @@ public class LoanService {
     private final LoanRepaymentReceiptRepository loanRepaymentReceiptRepository;
 
     public LoanResponseDto checkLoanEligibility(String productCode, String customerCode) {
-        Customer customer = customerService.getCustomerEntity(customerCode);
+        customerService.getCustomerEntity(customerCode);
         Product product = productService.getProductEntity(productCode);
 
         validationService.validateLoanApplicationRequest(product);

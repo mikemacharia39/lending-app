@@ -1,3 +1,3 @@
 id;product_id;name;fee_type;value_type;fee_value;applied_at_origination;daily_accrual;date_created;date_modified
-3;2;Processing Fee;SERVICE_FEE;PERCENTAGE;5.0;true;false;2025-03-13 13:05:00;2025-03-13 13:05:00
-4;2;Late repayment Fee;LATE_FEE;PERCENTAGE;1.5;false;false;2025-03-13 13:05:00;2025-03-13 13:05:00
+1;1;Processing Fee;SERVICE_FEE;PERCENTAGE;5.0;true;false;2025-03-13 13:05:00;2025-03-13 13:05:00
+2;1;Late repayment Fee;LATE_FEE;PERCENTAGE;1.5;false;false;2025-03-13 13:05:00;2025-03-13 13:05:00
