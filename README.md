@@ -52,7 +52,7 @@ See scheduler flow below
 ![Lending-flow-scheduler.png](Lending-flow-scheduler.png)
 
 ### Technologies Used
-1. Java 21
+1. Jdk 21
 2. Spring boot 3.4.3
 3. MySQL > 5.7
 4. Liquibase
