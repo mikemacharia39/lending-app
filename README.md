@@ -54,6 +54,11 @@ See scheduler flow below
 ### Technologies Used
 1. Java 21
 2. Spring boot 3.4.3
-3. MySQL
+3. MySQL > 5.7
 4. Liquibase
+
+### Running the application
+After building the application, you can run the application from the main class `LendingApplication.java`
+
+You can alternatively run `./gradlew bootRun` from the terminal.
 
